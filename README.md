@@ -1,2 +1,2 @@
-# 2iGames.com
+# TwoNEGames.com
 Сайт с мини играми
