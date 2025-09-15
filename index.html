@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru_RU">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Игры от 2I</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="images/photo_2025-09-14_14-36-55.png" type="image/png">
     <style>
         :root {
             --primary: #6c5ce7;
@@ -31,7 +33,7 @@
             --dark: #dfe6e9;
             --light: #2d3436;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
@@ -39,14 +41,14 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             transition: background-color 0.3s, color 0.3s;
         }
-        
+
         body {
             background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
             color: var(--text-primary);
             min-height: 100vh;
             padding-bottom: 60px;
         }
-        
+
         /* Экран загрузки */
         .loader-container {
             position: fixed;
@@ -61,7 +63,7 @@
             z-index: 9999;
             transition: opacity 0.5s ease-out;
         }
-        
+
         .loader {
             width: 50px;
             height: 50px;
@@ -70,22 +72,153 @@
             border-top: 5px solid var(--primary);
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* Анимации для плавного появления */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         .animate-fadeIn {
             animation: fadeIn 0.5s ease forwards;
         }
-        
+
+        /* Модальное окно новостей */
+        .news-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .news-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .news-content {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(-50px);
+            transition: transform 0.5s ease;
+        }
+
+        .news-modal.active .news-content {
+            transform: translateY(0);
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .news-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .close-news {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .news-list {
+            list-style: none;
+        }
+
+        .news-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .news-item h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .news-item p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .news-date {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--accent);
+            margin-top: 5px;
+        }
+
+        .news-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .show-news-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 80;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        /* Остальные стили остаются без изменений */
         header {
             background-color: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
@@ -98,7 +231,7 @@
             z-index: 100;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
-        
+
         .logo {
             font-size: 22px;
             font-weight: 800;
@@ -108,17 +241,17 @@
             display: flex;
             align-items: center;
         }
-        
+
         .logo i {
             margin-right: 8px;
         }
-        
+
         .header-controls {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        
+
         .theme-toggle {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -131,7 +264,7 @@
             align-items: center;
             position: relative;
         }
-        
+
         .theme-toggle::before {
             content: '';
             position: absolute;
@@ -141,11 +274,11 @@
             background: white;
             transition: transform 0.3s;
         }
-        
+
         .light-theme .theme-toggle::before {
             transform: translateX(24px);
         }
-        
+
         .achievements-btn {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -159,7 +292,7 @@
             justify-content: center;
             position: relative;
         }
-        
+
         .achievement-badge {
             position: absolute;
             top: -5px;
@@ -174,16 +307,16 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         nav ul {
             display: flex;
             list-style: none;
         }
-        
+
         nav ul li {
             margin-left: 15px;
         }
-        
+
         nav ul li a {
             color: var(--text-primary);
             text-decoration: none;
@@ -192,13 +325,13 @@
             padding: 8px 12px;
             border-radius: 20px;
         }
-        
+
         nav ul li a:hover,
         nav ul li a.active {
             color: var(--primary);
             background: rgba(255, 255, 255, 0.1);
         }
-        
+
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -207,12 +340,12 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
-        
+
         .hero {
             text-align: center;
             padding: 60px 20px;
         }
-        
+
         .hero h1 {
             font-size: 2.5rem;
             margin-bottom: 15px;
@@ -220,14 +353,14 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .hero p {
             font-size: 1.1rem;
             max-width: 700px;
             margin: 0 auto 30px;
             color: var(--text-secondary);
         }
-        
+
         .games-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -236,7 +369,7 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-        
+
         .game-card {
             background: var(--card-bg);
             border-radius: 15px;
@@ -248,18 +381,18 @@
             position: relative;
             opacity: 0;
         }
-        
+
         .game-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
         }
-        
+
         .game-card-header {
             padding: 18px;
             text-align: center;
             background: rgba(0, 0, 0, 0.3);
         }
-        
+
         .game-card-header h3 {
             font-size: 1.3rem;
             margin-bottom: 8px;
@@ -268,28 +401,28 @@
             justify-content: center;
             gap: 8px;
         }
-        
+
         .game-card-body {
             padding: 18px;
         }
-        
+
         .game-card-body p {
             margin-bottom: 18px;
             color: var(--text-secondary);
             font-size: 0.95rem;
         }
-        
+
         .game-card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 18px 18px;
         }
-        
+
         .game-rating {
             color: var(--warning);
         }
-        
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -303,12 +436,12 @@
             transition: transform 0.2s, box-shadow 0.2s;
             font-size: 0.9rem;
         }
-        
+
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        
+
         .game-area {
             display: none;
             padding: 30px 5%;
@@ -316,7 +449,7 @@
             margin: 0 auto;
             animation: fadeIn 0.5s ease;
         }
-        
+
         .game-header {
             display: flex;
             justify-content: space-between;
@@ -325,24 +458,24 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        
+
         .back-btn {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
         }
-        
+
         .game-content {
             background: rgba(0, 0, 0, 0.3);
             padding: 25px;
             border-radius: 15px;
             min-height: 350px;
         }
-        
+
         /* Стили для игры "Угадай число" */
         #guessNumberGame {
             text-align: center;
         }
-        
+
         #guessInput {
             padding: 10px 18px;
             border: none;
@@ -354,19 +487,19 @@
             text-align: center;
             margin: 15px 0;
         }
-        
+
         .game-message {
             margin: 15px 0;
             padding: 12px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.1);
         }
-        
+
         /* Стили для игры "Крестики-нолики" */
         #ticTacToeGame {
             text-align: center;
         }
-        
+
         .board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -374,7 +507,7 @@
             max-width: 300px;
             margin: 0 auto;
         }
-        
+
         .cell {
             width: 90px;
             height: 90px;
@@ -388,16 +521,16 @@
             border-radius: 8px;
             transition: background 0.3s;
         }
-        
+
         .cell:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-        
+
         /* Стили для игры "Память" */
         #memoryGame {
             text-align: center;
         }
-        
+
         .memory-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -405,7 +538,7 @@
             max-width: 450px;
             margin: 0 auto;
         }
-        
+
         .memory-card {
             width: 90px;
             height: 90px;
@@ -420,23 +553,23 @@
             transition: transform 0.3s;
             transform-style: preserve-3d;
         }
-        
+
         .memory-card.flipped {
             transform: rotateY(180deg);
             background: var(--accent);
         }
-        
+
         /* Стили для игры "Змейка" */
         #snakeGame {
             text-align: center;
         }
-        
+
         #snakeCanvas {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 8px;
             max-width: 100%;
         }
-        
+
         .snake-controls {
             display: none;
             grid-template-columns: repeat(3, 1fr);
@@ -445,7 +578,7 @@
             max-width: 180px;
             margin: 15px auto;
         }
-        
+
         .control-btn {
             width: 60px;
             height: 60px;
@@ -459,17 +592,32 @@
             justify-content: center;
             align-items: center;
         }
-        
-        .control-btn.up { grid-column: 2; grid-row: 1; }
-        .control-btn.down { grid-column: 2; grid-row: 2; }
-        .control-btn.left { grid-column: 1; grid-row: 2; }
-        .control-btn.right { grid-column: 3; grid-row: 2; }
-        
+
+        .control-btn.up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .control-btn.down {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .control-btn.left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .control-btn.right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
         /* Стили для игры "Викторина" */
         #quizGame {
             text-align: center;
         }
-        
+
         .quiz-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -477,7 +625,7 @@
             max-width: 600px;
             margin: 15px auto;
         }
-        
+
         .quiz-option {
             padding: 12px;
             background: rgba(255, 255, 255, 0.1);
@@ -485,16 +633,16 @@
             cursor: pointer;
             transition: background 0.3s;
         }
-        
+
         .quiz-option:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-        
+
         /* Стили для игры "Слот-машина" */
         #slotsGame {
             text-align: center;
         }
-        
+
         .slots-container {
             display: flex;
             justify-content: center;
@@ -502,7 +650,7 @@
             margin: 20px 0;
             perspective: 1000px;
         }
-        
+
         .slot {
             width: 100px;
             height: 120px;
@@ -513,13 +661,13 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             border: 2px solid var(--primary);
         }
-        
+
         .slot-inner {
             position: absolute;
             width: 100%;
             transition: top 3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
+
         .slot-item {
             width: 100px;
             height: 120px;
@@ -528,7 +676,7 @@
             align-items: center;
             font-size: 3.5rem;
         }
-        
+
         .slots-controls {
             display: flex;
             flex-direction: column;
@@ -536,7 +684,7 @@
             gap: 15px;
             margin-top: 20px;
         }
-        
+
         .coins-display {
             font-size: 1.5rem;
             font-weight: bold;
@@ -545,7 +693,7 @@
             padding: 10px 20px;
             border-radius: 30px;
         }
-        
+
         .bet-controls {
             display: flex;
             align-items: center;
@@ -554,7 +702,7 @@
             padding: 10px 20px;
             border-radius: 30px;
         }
-        
+
         .bet-btn {
             width: 40px;
             height: 40px;
@@ -568,13 +716,13 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .bet-btn:disabled {
             background: var(--secondary);
             cursor: not-allowed;
             opacity: 0.5;
         }
-        
+
         .bet-amount {
             font-size: 1.5rem;
             font-weight: bold;
@@ -582,16 +730,21 @@
             text-align: center;
             color: var(--accent);
         }
-        
+
         .win-animation {
             animation: winPulse 0.5s infinite alternate;
         }
-        
+
         @keyframes winPulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.1); }
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.1);
+            }
         }
-        
+
         /* Стили для достижений */
         .achievements-modal {
             display: none;
@@ -605,7 +758,7 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         .achievements-content {
             background: var(--bg-secondary);
             padding: 25px;
@@ -615,7 +768,7 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-        
+
         .achievement-item {
             display: flex;
             align-items: center;
@@ -624,23 +777,23 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
         }
-        
+
         .achievement-icon {
             font-size: 1.8rem;
             margin-right: 12px;
             color: var(--warning);
         }
-        
+
         .achievement-info h4 {
             margin-bottom: 5px;
             font-size: 1rem;
         }
-        
+
         .achievement-info p {
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
-        
+
         .achievement-progress {
             height: 5px;
             background: rgba(255, 255, 255, 0.1);
@@ -648,17 +801,17 @@
             margin-top: 5px;
             overflow: hidden;
         }
-        
+
         .progress-bar {
             height: 100%;
             background: var(--success);
             border-radius: 5px;
         }
-        
+
         .achievement-locked {
             opacity: 0.5;
         }
-        
+
         footer {
             text-align: center;
             padding: 25px;
@@ -666,7 +819,7 @@
             color: var(--text-secondary);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         /* Мобильная навигация */
         .mobile-nav {
             display: none;
@@ -679,13 +832,13 @@
             z-index: 90;
             padding: 10px;
         }
-        
+
         .mobile-nav ul {
             display: flex;
             justify-content: space-around;
             list-style: none;
         }
-        
+
         .mobile-nav ul li a {
             display: flex;
             flex-direction: column;
@@ -694,12 +847,12 @@
             text-decoration: none;
             font-size: 0.8rem;
         }
-        
+
         .mobile-nav ul li a i {
             font-size: 1.2rem;
             margin-bottom: 5px;
         }
-        
+
         /* Уведомления */
         .notification {
             position: fixed;
@@ -715,160 +868,232 @@
             transform: translateX(100px);
             transition: opacity 0.5s, transform 0.5s;
         }
-        
+
         .notification.show {
             opacity: 1;
             transform: translateX(0);
         }
-        
+
         /* Медиа-запросы */
         @media (max-width: 768px) {
             header {
                 padding: 12px 4%;
             }
-            
+
             .logo {
                 font-size: 18px;
             }
-            
+
             nav ul {
                 display: none;
             }
-            
+
             .mobile-menu-btn {
                 display: block;
             }
-            
+
             .hero h1 {
                 font-size: 2rem;
             }
-            
+
             .hero p {
                 font-size: 1rem;
             }
-            
+
             .games-container {
                 grid-template-columns: 1fr;
                 gap: 20px;
                 padding: 15px 4%;
             }
-            
+
             .game-card-header h3 {
                 font-size: 1.2rem;
             }
-            
+
             .quiz-options {
                 grid-template-columns: 1fr;
             }
-            
+
             .board {
                 max-width: 270px;
             }
-            
+
             .cell {
                 width: 80px;
                 height: 80px;
                 font-size: 2rem;
             }
-            
+
             .memory-board {
                 max-width: 340px;
             }
-            
+
             .memory-card {
                 width: 75px;
                 height: 75px;
             }
-            
+
             #snakeCanvas {
                 width: 300px;
                 height: 300px;
             }
-            
+
             .slot {
                 width: 80px;
                 height: 100px;
             }
-            
+
             .slot-item {
                 width: 80px;
                 height: 100px;
                 font-size: 2.5rem;
             }
-            
+
             .mobile-nav {
                 display: block;
             }
-            
+
             .snake-controls {
                 display: grid;
             }
+
+            .news-content {
+                padding: 20px;
+            }
+
+            .show-news-btn {
+                bottom: 70px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
         }
-        
+
         @media (max-width: 480px) {
             .hero {
                 padding: 40px 15px;
             }
-            
+
             .hero h1 {
                 font-size: 1.8rem;
             }
-            
+
             .game-content {
                 padding: 15px;
             }
-            
+
             .board {
                 max-width: 240px;
             }
-            
+
             .cell {
                 width: 70px;
                 height: 70px;
                 font-size: 1.8rem;
             }
-            
+
             .memory-board {
                 grid-template-columns: repeat(4, 1fr);
                 max-width: 300px;
             }
-            
+
             .memory-card {
                 width: 65px;
                 height: 65px;
                 font-size: 1.2rem;
             }
-            
+
             #snakeCanvas {
                 width: 280px;
                 height: 280px;
             }
-            
+
             .slots-container {
                 gap: 10px;
             }
-            
+
             .slot {
                 width: 70px;
                 height: 90px;
             }
-            
+
             .slot-item {
                 width: 70px;
                 height: 90px;
                 font-size: 2rem;
             }
+
+            .news-content {
+                padding: 15px;
+            }
+
+            .news-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .news-item {
+                padding: 12px;
+            }
+
+            .show-news-btn {
+                bottom: 60px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <!-- Экран загрузки -->
     <div class="loader-container" id="loader">
         <div class="loader"></div>
     </div>
-    
+
+    <!-- Модальное окно новостей -->
+    <div class="news-modal" id="newsModal">
+        <div class="news-content">
+            <div class="news-header">
+                <h2><i class="fas fa-newspaper"></i> Новости / обновления</h2>
+                <button class="close-news" onclick="hideNews()"><i class="fas fa-times"></i></button>
+            </div>
+            <ul class="news-list">
+                <li class="news-item">
+                    <h3>Багофикс: Слот-машины</h3>
+                    <p>Исправлены все недароботки слот-машины.</p>
+                    <span class="news-date"><i class="fas fa-calendar-alt"></i> 15 сентября 2025</span>
+                </li>
+                <li class="news-item">
+                    <h3>Новая игра: Слот-машина</h3>
+                    <p>Добавлена новая азартная игра с возможностью выигрывать монеты и получать достижения.</p>
+                    <span class="news-date"><i class="fas fa-calendar-alt"></i> 14 сентября 2025</span>
+                </li>
+                <li class="news-item">
+                    <h3>Улучшенная змейка</h3>
+                    <p>Теперь змейка полностью адаптирована для мобильных устройств с добавлением кнопок управления.</p>
+                    <span class="news-date"><i class="fas fa-calendar-alt"></i> 14 сентября 2025</span>
+                </li>
+                <li class="news-item">
+                    <h3>Система достижений</h3>
+                    <p>Добавлена система достижений, которые можно получать за выполнение различных заданий в играх.</p>
+                    <span class="news-date"><i class="fas fa-calendar-alt"></i> 14 сентября 2025</span>
+                </li>
+            </ul>
+            <div class="news-footer">
+                <button class="btn" onclick="hideNews()">Понятно!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка показа новостей -->
+    <button class="show-news-btn" onclick="showNews()" id="showNewsBtn">
+        <i class="fas fa-newspaper"></i>
+    </button>
+
     <header>
-        <div class="logo"><i class="fas fa-gamepad"></i>Игры от 2I | BETA 0.2</div>
+        <div class="logo"><i class="fas fa-gamepad"></i>Игры от 2I | BETA 0.3</div>
         <div class="header-controls">
             <button class="achievements-btn" onclick="showAchievements()">
                 <i class="fas fa-trophy"></i>
@@ -888,13 +1113,14 @@
             </ul>
         </nav>
     </header>
-    
+
     <section class="hero" id="heroSection">
         <h1>Добро пожаловать в мир мини-игр!</h1>
-        <p>Выберите одну из увлекательных игр ниже и наслаждайтесь времяпровождением. Открывайте достижения и соревнуйтесь с друзьями!</p>
+        <p>Выберите одну из увлекательных игр ниже и наслаждайтесь времяпровождением. Открывайте достижения и
+            соревнуйтесь с друзьями!</p>
         <p>Игра от долбаебов | BETA Версия!</p>
     </section>
-    
+
     <div class="games-container" id="gamesContainer">
         <div class="game-card" onclick="showGame('guessNumberGame')">
             <div class="game-card-header">
@@ -914,7 +1140,7 @@
                 <div class="btn">Играть</div>
             </div>
         </div>
-        
+
         <div class="game-card" onclick="showGame('ticTacToeGame')">
             <div class="game-card-header">
                 <h3><i class="fas fa-times-circle"></i>Крестики-нолики</h3>
@@ -933,7 +1159,7 @@
                 <div class="btn">Играть</div>
             </div>
         </div>
-        
+
         <div class="game-card" onclick="showGame('memoryGame')">
             <div class="game-card-header">
                 <h3><i class="fas fa-brain"></i>Память</h3>
@@ -952,7 +1178,7 @@
                 <div class="btn">Играть</div>
             </div>
         </div>
-        
+
         <div class="game-card" onclick="showGame('snakeGame')">
             <div class="game-card-header">
                 <h3><i class="fas fa-slither"></i>Змейка</h3>
@@ -972,7 +1198,7 @@
                 <div class="btn">Играть</div>
             </div>
         </div>
-        
+
         <div class="game-card" onclick="showGame('quizGame')">
             <div class="game-card-header">
                 <h3><i class="fas fa-graduation-cap"></i>Викторина</h3>
@@ -991,8 +1217,18 @@
                 <div class="btn">Играть</div>
             </div>
         </div>
-        
-        <div class="game-card" onclick="showGame('slotsGame')">
+
+        <div class="game-card" onclick="openGame('slots')">
+
+            <script>
+                function openGame(gameType) {
+                    // переход на страницу
+                    window.location.href = gameType + '-games.html';
+
+                    // или открытие в новом окне
+                    // window.open(gameType + '-game.html', '_blank');
+                }
+            </script>
             <div class="game-card-header">
                 <h3><i class="fas fa-coins"></i>Слот-машина</h3>
             </div>
@@ -1011,7 +1247,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Игра "Угадай число" -->
     <section id="guessNumberGame" class="game-area">
         <div class="game-header">
@@ -1025,10 +1261,11 @@
             <button class="btn" onclick="checkGuess()"><i class="fas fa-check"></i> Проверить</button>
             <div class="game-message" id="guessMessage">Введите число и нажмите "Проверить"</div>
             <p>Попытки: <span id="attempts">0</span></p>
-            <button class="btn" onclick="resetGuessGame()" style="margin-top: 15px;"><i class="fas fa-redo"></i> Новая игра</button>
+            <button class="btn" onclick="resetGuessGame()" style="margin-top: 15px;"><i class="fas fa-redo"></i> Новая
+                игра</button>
         </div>
     </section>
-    
+
     <!-- Игра "Крестики-нолики" -->
     <section id="ticTacToeGame" class="game-area">
         <div class="game-header">
@@ -1052,7 +1289,7 @@
             <button class="btn" onclick="resetTicTacToe()"><i class="fas fa-redo"></i> Новая игры</button>
         </div>
     </section>
-    
+
     <!-- Игра "Память" -->
     <section id="memoryGame" class="game-area">
         <div class="game-header">
@@ -1067,7 +1304,7 @@
             <button class="btn" onclick="resetMemory()"><i class="fas fa-redo"></i> Новая игра</button>
         </div>
     </section>
-    
+
     <!-- Игра "Змейка" -->
     <section id="snakeGame" class="game-area">
         <div class="game-header">
@@ -1077,20 +1314,23 @@
         <div class="game-content">
             <p>Управляйте змейкой с помощью стрелок. Собирайте еду (красные квадраты) и избегайте столкновений.</p>
             <canvas id="snakeCanvas" width="400" height="400"></canvas>
-            
+
             <div class="snake-controls">
                 <button class="control-btn up" onclick="changeDirection('up')"><i class="fas fa-arrow-up"></i></button>
-                <button class="control-btn down" onclick="changeDirection('down')"><i class="fas fa-arrow-down"></i></button>
-                <button class="control-btn left" onclick="changeDirection('left')"><i class="fas fa-arrow-left"></i></button>
-                <button class="control-btn right" onclick="changeDirection('right')"><i class="fas fa-arrow-right"></i></button>
+                <button class="control-btn down" onclick="changeDirection('down')"><i
+                        class="fas fa-arrow-down"></i></button>
+                <button class="control-btn left" onclick="changeDirection('left')"><i
+                        class="fas fa-arrow-left"></i></button>
+                <button class="control-btn right" onclick="changeDirection('right')"><i
+                        class="fas fa-arrow-right"></i></button>
             </div>
-            
+
             <div class="game-message" id="snakeMessage">Нажмите "Начать игру" для старта</div>
             <p>Счет: <span id="score">0</span></p>
             <button class="btn" onclick="initSnake()"><i class="fas fa-play"></i> Начать игру</button>
         </div>
     </section>
-    
+
     <!-- Игра "Викторина" -->
     <section id="quizGame" class="game-area">
         <div class="game-header">
@@ -1099,7 +1339,8 @@
         </div>
         <div class="game-content">
             <div id="quizStart">
-                <p>Проверьте свои знания в этой викторине! Вам предстоит ответить на 10 вопросов из разных категорий.</p>
+                <p>Проверьте свои знания в этой викторине! Вам предстоит ответить на 10 вопросов из разных категорий.
+                </p>
                 <button class="btn" onclick="startQuiz()"><i class="fas fa-play"></i> Начать викторину</button>
             </div>
             <div id="quizGameplay" style="display: none;">
@@ -1117,80 +1358,13 @@
             </div>
         </div>
     </section>
-    
-    <!-- Игра "Слот-машина" -->
-    <section id="slotsGame" class="game-area">
-        <div class="game-header">
-            <h2><i class="fas fa-coins"></i> Слот-машина</h2>
-            <button class="btn back-btn" onclick="hideGames()"><i class="fas fa-arrow-left"></i> Назад к играм</button>
-        </div>
-        <div class="game-content">
-            <p>Попробуйте удачу! Выберите ставку и нажмите "Крутить". Три одинаковых символа - победа!</p>
-            
-            <div class="slots-container">
-                <div class="slot">
-                    <div class="slot-inner" id="slot1">
-                        <div class="slot-item">🍒</div>
-                        <div class="slot-item">🍋</div>
-                        <div class="slot-item">🍊</div>
-                        <div class="slot-item">🍇</div>
-                        <div class="slot-item">🔔</div>
-                        <div class="slot-item">💎</div>
-                        <div class="slot-item">🍒</div>
-                        <div class="slot-item">🍋</div>
-                        <div class="slot-item">🍊</div>
-                    </div>
-                </div>
-                <div class="slot">
-                    <div class="slot-inner" id="slot2">
-                        <div class="slot-item">🍒</div>
-                        <div class="slot-item">🍋</div>
-                        <div class="slot-item">🍊</div>
-                        <div class="slot-item">🍇</div>
-                        <div class="slot-item">🔔</div>
-                        <div class="slot-item">💎</div>
-                        <div class="slot-item">🍒</div>
-                        <div class="slot-item">🍋</div>
-                        <div class="slot-item">🍊</div>
-                    </div>
-                </div>
-                <div class="slot">
-                    <div class="slot-inner" id="slot3">
-                        <div class="slot-item">🍒</div>
-                        <div class="slot-item">🍋</div>
-                        <div class="slot-item">🍊</div>
-                        <div class="slot-item">🍇</div>
-                        <div class="slot-item">🔔</div>
-                        <div class="slot-item">💎</div>
-                        <div class="slot-item">🍒</div>
-                        <div class="slot-item">🍋</div>
-                        <div class="slot-item">🍊</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="slots-controls">
-                <div class="coins-display">Монеты: <span id="coins">100</span></div>
-                
-                <div class="bet-controls">
-                    <button class="bet-btn" id="decreaseBet" onclick="changeBet(-1)">-</button>
-                    <div class="bet-amount" id="betAmount">5</div>
-                    <button class="bet-btn" id="increaseBet" onclick="changeBet(1)">+</button>
-                </div>
-                
-                <button class="btn" id="spinButton" onclick="spinSlots()"><i class="fas fa-play"></i> Крутить (<span id="betDisplay">5</span> монет)</button>
-                
-                <div class="game-message" id="slotsMessage">Сделайте ставку и крутите!</div>
-            </div>
-        </div>
-    </section>
-    
+
     <!-- Модальное окно достижений -->
     <div class="achievements-modal" id="achievementsModal">
         <div class="achievements-content">
             <h2><i class="fas fa-trophy"></i> Достижения</h2>
             <p>Зарабатывайте достижения, играя в игры!</p>
-            
+
             <div class="achievement-item" id="achievement1">
                 <div class="achievement-icon"><i class="fas fa-search"></i></div>
                 <div class="achievement-info">
@@ -1201,7 +1375,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="achievement-item achievement-locked" id="achievement2">
                 <div class="achievement-icon"><i class="fas fa-chess-board"></i></div>
                 <div class="achievement-info">
@@ -1212,7 +1386,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="achievement-item achievement-locked" id="achievement3">
                 <div class="achievement-icon"><i class="fas fa-brain"></i></div>
                 <div class="achievement-info">
@@ -1223,7 +1397,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="achievement-item achievement-locked" id="achievement4">
                 <div class="achievement-icon"><i class="fas fa-snake"></i></div>
                 <div class="achievement-info">
@@ -1234,7 +1408,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="achievement-item achievement-locked" id="achievement5">
                 <div class="achievement-icon"><i class="fas fa-graduation-cap"></i></div>
                 <div class="achievement-info">
@@ -1245,7 +1419,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="achievement-item achievement-locked" id="achievement6">
                 <div class="achievement-icon"><i class="fas fa-coins"></i></div>
                 <div class="achievement-info">
@@ -1256,7 +1430,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="achievement-item achievement-locked" id="achievement7">
                 <div class="achievement-icon"><i class="fas fa-money-bill-wave"></i></div>
                 <div class="achievement-info">
@@ -1267,11 +1441,11 @@
                     </div>
                 </div>
             </div>
-            
+
             <button class="btn" onclick="hideAchievements()" style="margin-top: 20px;">Закрыть</button>
         </div>
     </div>
-    
+
     <!-- Мобильная навигация -->
     <div class="mobile-nav">
         <ul>
@@ -1281,12 +1455,21 @@
             <li><a href="#"><i class="fas fa-info-circle"></i>О нас</a></li>
         </ul>
     </div>
-    
+
     <footer>
         <p>© 2025 Игры от 2I. Все права защищены.</p>
     </footer>
 
     <script>
+        // Функции для работы с новостями
+        function showNews() {
+            document.getElementById('newsModal').classList.add('active');
+        }
+
+        function hideNews() {
+            document.getElementById('newsModal').classList.remove('active');
+        }
+
         // Основные функции для переключения между играми
         function showGame(gameId) {
             document.querySelectorAll('.game-area').forEach(game => {
@@ -1295,7 +1478,7 @@
             document.querySelector('.games-container').style.display = 'none';
             document.querySelector('.hero').style.display = 'none';
             document.getElementById(gameId).style.display = 'block';
-            
+
             // Инициализация конкретной игры
             if (gameId === 'memoryGame') {
                 initMemory();
@@ -1308,28 +1491,28 @@
             } else if (gameId === 'slotsGame') {
                 initSlots();
             }
-            
+
             // Скрыть мобильную навигацию при открытии игры
             document.querySelector('.mobile-nav').style.display = 'none';
         }
-        
+
         function hideGames() {
             document.querySelectorAll('.game-area').forEach(game => {
                 game.style.display = 'none';
             });
             document.querySelector('.games-container').style.display = 'grid';
             document.querySelector('.hero').style.display = 'block';
-            
+
             // Показать мобильную навигацию при возврате к играм
             if (window.innerWidth <= 768) {
                 document.querySelector('.mobile-nav').style.display = 'block';
             }
         }
-        
+
         function showMainScreen() {
             hideGames();
         }
-        
+
         // Переключение темы
         function toggleTheme() {
             document.body.classList.toggle('light-theme');
@@ -1337,43 +1520,43 @@
             const isLightTheme = document.body.classList.contains('light-theme');
             localStorage.setItem('lightTheme', isLightTheme);
         }
-        
+
         // Мобильное меню
         function toggleMobileNav() {
             const nav = document.querySelector('.mobile-nav');
             nav.style.display = nav.style.display === 'none' ? 'block' : 'none';
         }
-        
+
         // Достижения
         function showAchievements() {
             document.getElementById('achievementsModal').style.display = 'flex';
         }
-        
+
         function hideAchievements() {
             document.getElementById('achievementsModal').style.display = 'none';
         }
-        
+
         // Игра "Угадай число"
         let randomNumber = Math.floor(Math.random() * 100) + 1;
         let attempts = 0;
-        
+
         function checkGuess() {
             const guess = parseInt(document.getElementById('guessInput').value);
             const message = document.getElementById('guessMessage');
             const attemptsElement = document.getElementById('attempts');
-            
+
             if (isNaN(guess) || guess < 1 || guess > 100) {
                 message.textContent = 'Пожалуйста, введите число от 1 до 100';
                 return;
             }
-            
+
             attempts++;
             attemptsElement.textContent = attempts;
-            
+
             if (guess === randomNumber) {
                 message.textContent = `Поздравляем! Вы угадали число ${randomNumber} за ${attempts} попыток!`;
                 message.style.background = 'rgba(0, 184, 148, 0.3)';
-                
+
                 // Проверка на достижение
                 if (attempts === 1) {
                     unlockAchievement(1);
@@ -1386,7 +1569,7 @@
                 message.style.background = 'rgba(253, 121, 168, 0.3)';
             }
         }
-        
+
         function resetGuessGame() {
             randomNumber = Math.floor(Math.random() * 100) + 1;
             attempts = 0;
@@ -1395,53 +1578,53 @@
             document.getElementById('guessMessage').textContent = 'Введите число и нажмите "Проверить"';
             document.getElementById('guessMessage').style.background = 'rgba(255, 255, 255, 0.1)';
         }
-        
+
         // Игра "Крестики-нолики"
         let currentPlayer = 'X';
         let board = ['', '', '', '', '', '', '', '', ''];
         let gameActive = true;
         let ticTacToeWins = 0;
-        
+
         const winningConditions = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
             [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
             [0, 4, 8], [2, 4, 6]             // diagonals
         ];
-        
+
         function makeMove(cellIndex) {
             if (board[cellIndex] !== '' || !gameActive) return;
-            
+
             board[cellIndex] = currentPlayer;
             document.querySelectorAll('.cell')[cellIndex].textContent = currentPlayer;
-            
+
             if (checkWin()) {
                 document.getElementById('tictactoeMessage').textContent = `Игрок ${currentPlayer} победил!`;
                 gameActive = false;
-                
+
                 if (currentPlayer === 'X') {
                     ticTacToeWins++;
                     updateAchievementProgress(2, ticTacToeWins, 5);
                 }
                 return;
             }
-            
+
             if (checkDraw()) {
                 document.getElementById('tictactoeMessage').textContent = 'Ничья!';
                 gameActive = false;
                 return;
             }
-            
+
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
             document.getElementById('tictactoeMessage').textContent = `Ход игрока ${currentPlayer}`;
-            
+
             if (currentPlayer === 'O') {
                 setTimeout(computerMove, 500);
             }
         }
-        
+
         function computerMove() {
             if (!gameActive) return;
-            
+
             // Простой ИИ: выбирает случайную свободную клетку
             let availableCells = [];
             for (let i = 0; i < 9; i++) {
@@ -1449,13 +1632,13 @@
                     availableCells.push(i);
                 }
             }
-            
+
             if (availableCells.length > 0) {
                 const randomCell = availableCells[Math.floor(Math.random() * availableCells.length)];
                 makeMove(randomCell);
             }
         }
-        
+
         function checkWin() {
             for (let i = 0; i < winningConditions.length; i++) {
                 const [a, b, c] = winningConditions[i];
@@ -1465,37 +1648,37 @@
             }
             return false;
         }
-        
+
         function checkDraw() {
             return !board.includes('');
         }
-        
+
         function resetTicTacToe() {
             board = ['', '', '', '', '', '', '', '', ''];
             currentPlayer = 'X';
             gameActive = true;
-            
+
             document.querySelectorAll('.cell').forEach(cell => {
                 cell.textContent = '';
             });
-            
+
             document.getElementById('tictactoeMessage').textContent = 'Ваш ход. Вы играете за X';
         }
-        
+
         // Игра "Память"
         let memoryCards = [];
         let flippedCards = [];
         let moves = 0;
         let matchedPairs = 0;
-        
+
         function initMemory() {
             const symbols = ['🍕', '🚀', '🌟', '🐱', '🌎', '🎮', '🚗', '🎉'];
             memoryCards = [...symbols, ...symbols];
             memoryCards.sort(() => Math.random() - 0.5);
-            
+
             const memoryBoard = document.getElementById('memoryBoard');
             memoryBoard.innerHTML = '';
-            
+
             for (let i = 0; i < 16; i++) {
                 const card = document.createElement('div');
                 card.className = 'memory-card';
@@ -1504,20 +1687,20 @@
                 card.addEventListener('click', flipCard);
                 memoryBoard.appendChild(card);
             }
-            
+
             moves = 0;
             matchedPairs = 0;
             flippedCards = [];
             document.getElementById('moves').textContent = moves;
             document.getElementById('memoryMessage').textContent = 'Откройте первую карточку';
         }
-        
+
         function flipCard() {
             if (flippedCards.length < 2 && !flippedCards.includes(this) && !this.classList.contains('flipped')) {
                 this.classList.add('flipped');
                 this.textContent = memoryCards[this.dataset.index];
                 flippedCards.push(this);
-                
+
                 if (flippedCards.length === 2) {
                     moves++;
                     document.getElementById('moves').textContent = moves;
@@ -1525,18 +1708,18 @@
                 }
             }
         }
-        
+
         function checkMatch() {
             const [card1, card2] = flippedCards;
             const isMatch = memoryCards[card1.dataset.index] === memoryCards[card2.dataset.index];
-            
+
             if (isMatch) {
                 matchedPairs++;
                 flippedCards = [];
-                
+
                 if (matchedPairs === 8) {
                     document.getElementById('memoryMessage').textContent = `Поздравляем! Вы нашли все пары за ${moves} ходов!`;
-                    
+
                     // Проверка на достижение
                     if (moves < 20) {
                         unlockAchievement(3);
@@ -1555,11 +1738,11 @@
                 }, 1000);
             }
         }
-        
+
         function resetMemory() {
             initMemory();
         }
-        
+
         // Игра "Змейка"
         let snake = [];
         let food = {};
@@ -1567,69 +1750,69 @@
         let gameInterval;
         let score = 0;
         let isGameRunning = false;
-        
+
         function initSnake() {
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Очистка canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // Инициализация змейки
             snake = [
-                {x: 160, y: 200},
-                {x: 140, y: 200},
-                {x: 120, y: 200}
+                { x: 160, y: 200 },
+                { x: 140, y: 200 },
+                { x: 120, y: 200 }
             ];
-            
+
             // Генерация еды
             generateFood();
-            
+
             // Сброс счета
             score = 0;
             document.getElementById('score').textContent = score;
             document.getElementById('snakeMessage').textContent = 'Игра началась! Управление стрелками';
-            
+
             // Запуск игры
             if (gameInterval) clearInterval(gameInterval);
             isGameRunning = true;
             gameInterval = setInterval(gameLoop, 150);
-            
+
             // Обработка нажатий клавиш
             document.addEventListener('keydown', handleKeyDown);
         }
-        
+
         function generateFood() {
             const canvas = document.getElementById('snakeCanvas');
             const x = Math.floor(Math.random() * (canvas.width / 20)) * 20;
             const y = Math.floor(Math.random() * (canvas.height / 20)) * 20;
-            
+
             // Проверка, чтобы еда не появилась на змейке
             for (let part of snake) {
                 if (part.x === x && part.y === y) {
                     return generateFood();
                 }
             }
-            
-            food = {x, y};
+
+            food = { x, y };
         }
-        
+
         function gameLoop() {
             if (!isGameRunning) return;
-            
+
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Движение змейки
-            const head = {x: snake[0].x, y: snake[0].y};
-            
-            switch(direction) {
+            const head = { x: snake[0].x, y: snake[0].y };
+
+            switch (direction) {
                 case 'right': head.x += 20; break;
                 case 'left': head.x -= 20; break;
                 case 'up': head.y -= 20; break;
                 case 'down': head.y += 20; break;
             }
-            
+
             // Проверка столкновений
             if (
                 head.x < 0 || head.x >= canvas.width ||
@@ -1641,43 +1824,43 @@
                 document.getElementById('snakeMessage').textContent = 'Игра окончена! Нажмите "Начать игру" для рестарта';
                 return;
             }
-            
+
             // Добавление новой головы
             snake.unshift(head);
-            
+
             // Проверка, съела ли змейка еду
             if (head.x === food.x && head.y === food.y) {
                 score += 10;
                 document.getElementById('score').textContent = score;
-                
+
                 // Проверка на достижение
                 if (score >= 100) {
                     unlockAchievement(4);
                 }
-                
+
                 generateFood();
             } else {
                 // Удаление хвоста, если еда не съедена
                 snake.pop();
             }
-            
+
             // Отрисовка
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // Отрисовка еды
             ctx.fillStyle = '#ff4757';
             ctx.fillRect(food.x, food.y, 20, 20);
-            
+
             // Отрисовка змейки
             ctx.fillStyle = '#2ed573';
             for (let part of snake) {
                 ctx.fillRect(part.x, part.y, 20, 20);
             }
         }
-        
+
         function handleKeyDown(event) {
             const key = event.keyCode;
-            
+
             // Стрелка влево
             if (key === 37 && direction !== 'right') {
                 direction = 'left';
@@ -1690,18 +1873,18 @@
             else if (key === 39 && direction !== 'left') {
                 direction = 'right';
             }
-            // Стрелка вниз
+            // Стрелка вниш
             else if (key === 40 && direction !== 'up') {
                 direction = 'down';
             }
             // Пробел для паузы
             else if (key === 32) {
                 isGameRunning = !isGameRunning;
-                document.getElementById('snakeMessage').textContent = isGameRunning ? 
+                document.getElementById('snakeMessage').textContent = isGameRunning ?
                     'Игра продолжается' : 'Игра на паузе. Нажмите пробел для продолжения';
             }
         }
-        
+
         function changeDirection(newDirection) {
             // Проверка на противоположное направление
             if (
@@ -1713,7 +1896,7 @@
                 direction = newDirection;
             }
         }
-        
+
         // Игра "Викторина"
         const quizQuestions = [
             {
@@ -1767,28 +1950,28 @@
                 answer: 1
             }
         ];
-        
+
         let currentQuestion = 0;
         let quizScore = 0;
-        
+
         function startQuiz() {
             document.getElementById('quizStart').style.display = 'none';
             document.getElementById('quizGameplay').style.display = 'block';
             document.getElementById('quizResults').style.display = 'none';
-            
+
             currentQuestion = 0;
             quizScore = 0;
             showQuestion();
         }
-        
+
         function showQuestion() {
             const question = quizQuestions[currentQuestion];
             document.getElementById('quizQuestion').textContent = question.question;
             document.getElementById('quizProgress').textContent = `${currentQuestion + 1}/${quizQuestions.length}`;
-            
+
             const optionsContainer = document.getElementById('quizOptions');
             optionsContainer.innerHTML = '';
-            
+
             question.options.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.className = 'quiz-option';
@@ -1796,14 +1979,14 @@
                 optionElement.onclick = () => checkAnswer(index);
                 optionsContainer.appendChild(optionElement);
             });
-            
+
             document.getElementById('quizMessage').textContent = 'Выберите ответ';
         }
-        
+
         function checkAnswer(selectedIndex) {
             const question = quizQuestions[currentQuestion];
             const messageElement = document.getElementById('quizMessage');
-            
+
             if (selectedIndex === question.answer) {
                 messageElement.textContent = 'Правильно!';
                 messageElement.style.background = 'rgba(0, 184, 148, 0.3)';
@@ -1812,7 +1995,7 @@
                 messageElement.textContent = `Неправильно! Правильный ответ: ${question.options[question.answer]}`;
                 messageElement.style.background = 'rgba(253, 121, 168, 0.3)';
             }
-            
+
             setTimeout(() => {
                 currentQuestion++;
                 if (currentQuestion < quizQuestions.length) {
@@ -1822,196 +2005,18 @@
                 }
             }, 1500);
         }
-        
+
         function showQuizResults() {
             document.getElementById('quizGameplay').style.display = 'none';
             document.getElementById('quizResults').style.display = 'block';
             document.getElementById('quizScore').textContent = quizScore;
-            
+
             // Проверка на достижение
             if (quizScore === quizQuestions.length) {
                 unlockAchievement(5);
             }
         }
-        
-        // Игра "Слот-машина"
-        let coins = 100;
-        let betAmount = 5;
-        let isSpinning = false;
-        let totalWinnings = 0;
-        
-        const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎'];
-        const symbolValues = {
-            '🍒': 2,
-            '🍋': 3,
-            '🍊': 4,
-            '🍇': 5,
-            '🔔': 10,
-            '💎': 20
-        };
-        
-        function initSlots() {
-            // Загрузка сохраненных данных
-            const savedCoins = localStorage.getItem('slotsCoins');
-            const savedBet = localStorage.getItem('slotsBet');
-            const savedWinnings = localStorage.getItem('slotsWinnings');
-            
-            if (savedCoins) coins = parseInt(savedCoins);
-            if (savedBet) betAmount = parseInt(savedBet);
-            if (savedWinnings) totalWinnings = parseInt(savedWinnings);
-            
-            updateSlotsDisplay();
-            
-            // Сброс позиции слотов
-            const slots = [
-                document.getElementById('slot1'),
-                document.getElementById('slot2'),
-                document.getElementById('slot3')
-            ];
-            
-            slots.forEach(slot => {
-                slot.style.top = '0px';
-            });
-        }
-        
-        function updateSlotsDisplay() {
-            document.getElementById('coins').textContent = coins;
-            document.getElementById('betAmount').textContent = betAmount;
-            document.getElementById('betDisplay').textContent = betAmount;
-            
-            // Блокировка кнопок, если недостаточно монет
-            document.getElementById('decreaseBet').disabled = betAmount <= 1;
-            document.getElementById('increaseBet').disabled = betAmount >= 20 || betAmount >= coins;
-            document.getElementById('spinButton').disabled = isSpinning || coins < betAmount;
-        }
-        
-        function changeBet(amount) {
-            if (isSpinning) return;
-            
-            betAmount += amount;
-            
-            // Ограничения на ставку
-            if (betAmount < 1) betAmount = 1;
-            if (betAmount > coins) betAmount = coins;
-            if (betAmount > 20) betAmount = 20;
-            
-            // Сохранение и обновление
-            localStorage.setItem('slotsBet', betAmount);
-            updateSlotsDisplay();
-        }
-        
-        function spinSlots() {
-            if (isSpinning || coins < betAmount) return;
-            
-            isSpinning = true;
-            coins -= betAmount;
-            updateSlotsDisplay();
-            
-            document.getElementById('slotsMessage').textContent = 'Крутим...';
-            document.getElementById('slotsMessage').style.background = 'rgba(255, 255, 255, 0.1)';
-            
-            // Генерация случайных результатов
-            const results = [
-                Math.floor(Math.random() * symbols.length),
-                Math.floor(Math.random() * symbols.length),
-                Math.floor(Math.random() * symbols.length)
-            ];
-            
-            // Анимация вращения для каждого слота
-            const slots = [
-                document.getElementById('slot1'),
-                document.getElementById('slot2'),
-                document.getElementById('slot3')
-            ];
-            
-            // Сброс позиции перед анимацией
-            slots.forEach(slot => {
-                slot.style.transition = 'none';
-                slot.style.top = '0px';
-            });
-            
-            // Принудительное обновление DOM
-            setTimeout(() => {
-                slots.forEach(slot => {
-                    slot.style.transition = 'top 3s cubic-bezier(0.16, 1, 0.3, 1)';
-                });
-                
-                // Запуск анимации с небольшими задержками для каждого слота
-                setTimeout(() => animateSlot(slots[0], results[0]), 100);
-                setTimeout(() => animateSlot(slots[1], results[1]), 200);
-                setTimeout(() => animateSlot(slots[2], results[2], checkResults), 300);
-            }, 50);
-            
-            // Функция для проверки результатов после завершения анимации
-            function checkResults() {
-                const resultSymbols = results.map(index => symbols[index]);
-                let winAmount = 0;
-                
-                // Проверка на выигрыш
-                if (resultSymbols[0] === resultSymbols[1] && resultSymbols[1] === resultSymbols[2]) {
-                    // Джекпот - три одинаковых символа
-                    winAmount = betAmount * symbolValues[resultSymbols[0]];
-                    document.getElementById('slotsMessage').textContent = `ДЖЕКПОТ! Вы выиграли ${winAmount} монет!`;
-                    document.getElementById('slotsMessage').style.background = 'rgba(0, 184, 148, 0.3)';
-                    
-                    // Анимация победы
-                    const slotElements = document.querySelectorAll('.slot');
-                    slotElements.forEach(slot => {
-                        slot.classList.add('win-animation');
-                    });
-                    
-                    // Убрать анимацию через 2 секунды
-                    setTimeout(() => {
-                        slotElements.forEach(slot => {
-                            slot.classList.remove('win-animation');
-                        });
-                    }, 2000);
-                    
-                    // Проверка на достижение "Джекпот" для алмазов
-                    if (resultSymbols[0] === '💎') {
-                        unlockAchievement(6);
-                    }
-                } else if (resultSymbols[0] === resultSymbols[1] || resultSymbols[1] === resultSymbols[2] || resultSymbols[0] === resultSymbols[2]) {
-                    // Два одинаковых символа
-                    let matchedSymbol = resultSymbols[0] === resultSymbols[1] ? resultSymbols[0] : resultSymbols[2];
-                    winAmount = Math.floor(betAmount * symbolValues[matchedSymbol] / 2);
-                    document.getElementById('slotsMessage').textContent = `Два одинаковых! Вы выиграли ${winAmount} монет!`;
-                    document.getElementById('slotsMessage').style.background = 'rgba(0, 184, 148, 0.3)';
-                } else {
-                    document.getElementById('slotsMessage').textContent = 'Повезет в следующий раз!';
-                    document.getElementById('slotsMessage').style.background = 'rgba(253, 121, 168, 0.3)';
-                }
-                
-                // Обновление монет и сохранение
-                coins += winAmount;
-                totalWinnings += winAmount;
-                
-                updateSlotsDisplay();
-                isSpinning = false;
-                
-                // Сохранение прогресса
-                localStorage.setItem('slotsCoins', coins);
-                localStorage.setItem('slotsWinnings', totalWinnings);
-                
-                // Обновление достижения "Богач"
-                updateAchievementProgress(7, totalWinnings, 500);
-            }
-        }
-        
-        function animateSlot(slot, resultIndex, callback) {
-            // Количество дополнительных оборотов
-            const extraSpins = 3;
-            const spinHeight = -120 * (resultIndex + extraSpins * symbols.length);
-            
-            // Применяем анимацию
-            slot.style.top = `${spinHeight}px`;
-            
-            // Вызов callback после завершения анимации
-            if (callback) {
-                setTimeout(callback, 3000);
-            }
-        }
-        
+
         // Система достижений
         let unlockedAchievements = 0;
         const achievementProgress = {
@@ -2023,22 +2028,22 @@
             6: 0, // Выиграть джекпот в слотах (3 алмаза)
             7: 0  // Заработать 500 монет в слотах
         };
-        
+
         function unlockAchievement(id) {
             const achievement = document.getElementById(`achievement${id}`);
             if (achievement && achievement.classList.contains('achievement-locked')) {
                 achievement.classList.remove('achievement-locked');
                 unlockedAchievements++;
                 document.getElementById('achievementCount').textContent = unlockedAchievements;
-                
+
                 // Показываем уведомление
                 showNotification(`Достижение разблокировано: ${achievement.querySelector('h4').textContent}`);
-                
+
                 // Сохраняем прогресс
                 saveAchievements();
             }
         }
-        
+
         function updateAchievementProgress(id, current, target) {
             achievementProgress[id] = current;
             const progressBar = document.querySelector(`#achievement${id} .progress-bar`);
@@ -2046,28 +2051,28 @@
             if (progressBar) {
                 progressBar.style.width = `${progressPercent}%`;
             }
-            
+
             if (current >= target) {
                 unlockAchievement(id);
             }
-            
+
             // Сохраняем прогресс
             saveAchievements();
         }
-        
+
         function showNotification(message) {
             // Создаем элемент уведомления
             const notification = document.createElement('div');
             notification.className = 'notification';
             notification.textContent = message;
-            
+
             document.body.appendChild(notification);
-            
+
             // Показываем уведомление
             setTimeout(() => {
                 notification.classList.add('show');
             }, 10);
-            
+
             // Удаляем уведомление через 3 секунды
             setTimeout(() => {
                 notification.classList.remove('show');
@@ -2076,12 +2081,12 @@
                 }, 500);
             }, 3000);
         }
-        
+
         // Сохранение и загрузка достижений
         function saveAchievements() {
             localStorage.setItem('achievementProgress', JSON.stringify(achievementProgress));
             localStorage.setItem('unlockedAchievements', unlockedAchievements.toString());
-            
+
             // Сохраняем разблокированные достижения
             const unlocked = [];
             for (let i = 1; i <= 7; i++) {
@@ -2092,7 +2097,7 @@
             }
             localStorage.setItem('unlockedAchievementsList', JSON.stringify(unlocked));
         }
-        
+
         function loadAchievements() {
             const savedProgress = localStorage.getItem('achievementProgress');
             if (savedProgress) {
@@ -2100,24 +2105,24 @@
                 for (const id in progress) {
                     if (achievementProgress.hasOwnProperty(id)) {
                         achievementProgress[id] = progress[id];
-                        updateAchievementProgress(parseInt(id), progress[id], 
-                            id == 1 ? 1 : 
-                            id == 2 ? 5 : 
-                            id == 3 ? 1 : 
-                            id == 4 ? 100 : 
-                            id == 5 ? 10 : 
-                            id == 6 ? 1 : 
-                            id == 7 ? 500 : 1);
+                        updateAchievementProgress(parseInt(id), progress[id],
+                            id == 1 ? 1 :
+                                id == 2 ? 5 :
+                                    id == 3 ? 1 :
+                                        id == 4 ? 100 :
+                                            id == 5 ? 10 :
+                                                id == 6 ? 1 :
+                                                    id == 7 ? 500 : 1);
                     }
                 }
             }
-            
+
             const savedUnlocked = localStorage.getItem('unlockedAchievements');
             if (savedUnlocked) {
                 unlockedAchievements = parseInt(savedUnlocked);
                 document.getElementById('achievementCount').textContent = unlockedAchievements;
             }
-            
+
             const unlockedList = localStorage.getItem('unlockedAchievementsList');
             if (unlockedList) {
                 const unlocked = JSON.parse(unlockedList);
@@ -2129,14 +2134,14 @@
                 });
             }
         }
-        
+
         // Анимация появления карточек игр
         function animateGameCards() {
             const gameCards = document.querySelectorAll('.game-card');
             gameCards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
-                
+
                 setTimeout(() => {
                     card.classList.add('animate-fadeIn');
                     card.style.opacity = '1';
@@ -2144,41 +2149,46 @@
                 }, 100 * index);
             });
         }
-        
+
         // Инициализация при загрузке страницы
-        window.onload = function() {
+        window.onload = function () {
             // Скрываем экран загрузки
             setTimeout(() => {
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loader').style.display = 'none';
+
+                    // Показываем новости об обновлении после загрузки
+                    setTimeout(() => {
+                        showNews();
+                    }, 500);
                 }, 500);
             }, 1000);
-            
+
             initMemory();
-            
+
             // Загрузка сохраненной темы
             if (localStorage.getItem('lightTheme') === 'true') {
                 document.body.classList.add('light-theme');
             }
-            
+
             // Показать мобильную навигацию на мобильных устройствах
             if (window.innerWidth <= 768) {
                 document.querySelector('.mobile-nav').style.display = 'block';
             }
-            
+
             // Загрузка прогресса достижений
             loadAchievements();
-            
+
             // Анимируем появление карточек игр
             animateGameCards();
         };
-        
+
         // Сохранение прогресса перед закрытием страницы
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function () {
             saveAchievements();
         });
     </script>
 </body>
-</html>
 
+</html>
