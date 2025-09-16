@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Слот-машина</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="images/photo_2025-09-14_14-36-55.png" type="image/png">
     <style>
         :root {
             --primary: #6c5ce7;
@@ -212,6 +211,24 @@
             animation: winPulse 0.5s infinite alternate;
         }
 
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--warning);
+        }
+
         @media (max-width: 480px) {
             .slot {
                 width: 80px;
@@ -225,6 +242,11 @@
             }
             
             .slots-container {
+                gap: 10px;
+            }
+            
+            .stats {
+                flex-direction: column;
                 gap: 10px;
             }
         }
@@ -271,7 +293,26 @@
             
             <div class="message" id="message">Сделайте ставку и крутите!</div>
         </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div>Всего выиграно:</div>
+                <div class="stat-value" id="totalWinnings">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Сыграно игр:</div>
+                <div class="stat-value" id="gamesPlayed">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Макс. выигрыш:</div>
+                <div class="stat-value" id="maxWin">0</div>
+            </div>
+        </div>
     </div>
+
+    <audio id="spinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1080.mp3" preload="auto"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+    <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3" preload="auto"></audio>
 
     <script>
         // Конфигурация игры
@@ -290,15 +331,18 @@
         let betAmount = 5;
         let isSpinning = false;
         let totalWinnings = 0;
+        let gamesPlayed = 0;
+        let maxWin = 0;
+        let currentResults = [0, 0, 0]; // Храним текущие результаты
+        
+        // Звуковые эффекты
+        const spinSound = document.getElementById('spinSound');
+        const winSound = document.getElementById('winSound');
+        const loseSound = document.getElementById('loseSound');
         
         // Функция для возврата назад
         function goBack() {
-            // Здесь можно добавить логику возврата к списку игр');
-            window.location.href = 'index.html'; 
-            // В реальном проекте это может быть
-            // window.history.back(); 
-            // или 
-            // window.location.href = 'index.html';
+            window.history.back();
         }
         
         // Инициализация игры
@@ -307,15 +351,20 @@
             const savedCoins = localStorage.getItem('slotsCoins');
             const savedBet = localStorage.getItem('slotsBet');
             const savedWinnings = localStorage.getItem('slotsWinnings');
+            const savedGamesPlayed = localStorage.getItem('slotsGamesPlayed');
+            const savedMaxWin = localStorage.getItem('slotsMaxWin');
             
             if (savedCoins) coins = parseInt(savedCoins);
             if (savedBet) betAmount = parseInt(savedBet);
             if (savedWinnings) totalWinnings = parseInt(savedWinnings);
+            if (savedGamesPlayed) gamesPlayed = parseInt(savedGamesPlayed);
+            if (savedMaxWin) maxWin = parseInt(savedMaxWin);
             
             // Заполняем слоты символами
             fillSlots();
             
             updateDisplay();
+            updateStats();
         }
         
         // Заполнение слотов символами
@@ -325,7 +374,7 @@
                 slot.innerHTML = '';
                 
                 // Добавляем дополнительные символы для плавной анимации
-                for (let j = 0; j < 3; j++) {
+                for (let j = 0; j < 15; j++) {
                     symbols.forEach(symbol => {
                         const item = document.createElement('div');
                         item.className = 'slot-item';
@@ -333,6 +382,9 @@
                         slot.appendChild(item);
                     });
                 }
+                
+                // Устанавливаем начальную позицию
+                slot.style.top = '0px';
             }
         }
         
@@ -346,6 +398,13 @@
             document.getElementById('decreaseBet').disabled = betAmount <= 1;
             document.getElementById('increaseBet').disabled = betAmount >= 20 || betAmount >= coins;
             document.getElementById('spinButton').disabled = isSpinning || coins < betAmount;
+        }
+        
+        // Обновление статистики
+        function updateStats() {
+            document.getElementById('totalWinnings').textContent = totalWinnings;
+            document.getElementById('gamesPlayed').textContent = gamesPlayed;
+            document.getElementById('maxWin').textContent = maxWin;
         }
         
         // Изменение ставки
@@ -370,70 +429,70 @@
             
             isSpinning = true;
             coins -= betAmount;
+            gamesPlayed++;
             updateDisplay();
+            updateStats();
+            
+            // Сохранение прогресса
+            localStorage.setItem('slotsCoins', coins);
+            localStorage.setItem('slotsGamesPlayed', gamesPlayed);
             
             const messageElement = document.getElementById('message');
             messageElement.textContent = 'Крутим...';
             messageElement.className = 'message';
             
+            // Воспроизведение звука вращения
+            spinSound.currentTime = 0;
+            spinSound.play();
+            
             // Генерация случайных результатов
-            const results = [
+            currentResults = [
                 Math.floor(Math.random() * symbols.length),
                 Math.floor(Math.random() * symbols.length),
                 Math.floor(Math.random() * symbols.length)
             ];
             
             // Анимация вращения для каждого слота
-            const slots = [
-                document.getElementById('slot1'),
-                document.getElementById('slot2'),
-                document.getElementById('slot3')
-            ];
-            
-            // Сброс позиции перед анимацией
-            slots.forEach(slot => {
-                slot.style.transition = 'none';
-                slot.style.top = '0px';
-            });
-            
-            // Принудительное обновление DOM
-            setTimeout(() => {
-                slots.forEach(slot => {
-                    slot.style.transition = 'top 3s cubic-bezier(0.16, 1, 0.3, 1)';
-                });
-                
-                // Запуск анимации с небольшими задержками для каждого слота
-                setTimeout(() => animateSlot(slots[0], results[0]), 100);
-                setTimeout(() => animateSlot(slots[1], results[1]), 200);
-                setTimeout(() => animateSlot(slots[2], results[2], checkResults), 300);
-            }, 50);
+            animateSlot(0, currentResults[0]);
+            setTimeout(() => animateSlot(1, currentResults[1]), 300);
+            setTimeout(() => animateSlot(2, currentResults[2], true), 600);
         }
         
         // Анимация вращения слота
-        function animateSlot(slot, resultIndex, callback) {
+        function animateSlot(slotIndex, resultIndex, isLast = false) {
+            const slot = document.getElementById(`slot${slotIndex + 1}`);
+            const symbolHeight = 120;
+            const fullCycleHeight = symbols.length * symbolHeight;
+            
             // Вычисляем позицию для остановки на нужном символе
-            const symbolHeight = 120; // Высота одного символа
-            const visibleSymbols = 3; // Количество видимых символов
-            const extraSpins = 2; // Дополнительные обороты для эффекта
+            // Добавляем несколько полных циклов для эффекта вращения
+            const spinCycles = 5;
+            const targetPosition = -(spinCycles * fullCycleHeight + resultIndex * symbolHeight);
             
-            // Позиция для остановки (центрируем выбранный символ)
-            const targetPosition = -(resultIndex * symbolHeight + (extraSpins * symbols.length * symbolHeight));
+            // Сброс transition и установка начальной позиции
+            slot.style.transition = 'none';
+            slot.style.top = '0px';
             
-            // Применяем анимацию
-            slot.style.top = `${targetPosition}px`;
-            
-            // Вызов callback после завершения анимации
-            if (callback) {
-                setTimeout(callback, 3000);
-            }
+            // Принудительное обновление DOM
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    slot.style.transition = `top ${3 + slotIndex * 0.3}s cubic-bezier(0.16, 1, 0.3, 1)`;
+                    slot.style.top = `${targetPosition}px`;
+                    
+                    // Вызов проверки результатов после завершения анимации последнего слота
+                    if (isLast) {
+                        setTimeout(checkResults, 3500);
+                    }
+                });
+            });
         }
         
         // Проверка результатов
         function checkResults() {
             const resultSymbols = [
-                symbols[getCurrentSymbol(0)],
-                symbols[getCurrentSymbol(1)],
-                symbols[getCurrentSymbol(2)]
+                symbols[currentResults[0]],
+                symbols[currentResults[1]],
+                symbols[currentResults[2]]
             ];
             
             let winAmount = 0;
@@ -459,20 +518,37 @@
                         slot.classList.remove('win-animation');
                     });
                 }, 2000);
+                
+                // Звук выигрыша
+                winSound.currentTime = 0;
+                winSound.play();
             } else if (resultSymbols[0] === resultSymbols[1] || resultSymbols[1] === resultSymbols[2] || resultSymbols[0] === resultSymbols[2]) {
                 // Два одинаковых символа
                 let matchedSymbol = resultSymbols[0] === resultSymbols[1] ? resultSymbols[0] : resultSymbols[2];
                 winAmount = Math.floor(betAmount * symbolValues[matchedSymbol] / 2);
                 message = `Два одинаковых! Вы выиграли ${winAmount} монет!`;
                 messageClass = 'message win';
+                
+                // Звук выигрыша
+                winSound.currentTime = 0;
+                winSound.play();
             } else {
                 message = 'Повезет в следующий раз!';
                 messageClass = 'message lose';
+                
+                // Звук проигрыша
+                loseSound.currentTime = 0;
+                loseSound.play();
             }
             
             // Обновление монет
             coins += winAmount;
             totalWinnings += winAmount;
+            
+            // Обновление максимального выигрыша
+            if (winAmount > maxWin) {
+                maxWin = winAmount;
+            }
             
             // Обновление сообщения
             const messageElement = document.getElementById('message');
@@ -480,23 +556,13 @@
             messageElement.className = messageClass;
             
             updateDisplay();
+            updateStats();
             isSpinning = false;
             
             // Сохранение прогресса
             localStorage.setItem('slotsCoins', coins);
             localStorage.setItem('slotsWinnings', totalWinnings);
-        }
-        
-        // Получение текущего символа в слоте
-        function getCurrentSymbol(slotIndex) {
-            const slot = document.getElementById(`slot${slotIndex + 1}`);
-            const position = Math.abs(parseInt(slot.style.top || 0));
-            const symbolHeight = 120;
-            
-            // Вычисляем индекс символа с учетом смещения
-            const symbolIndex = Math.floor((position % (symbols.length * symbolHeight)) / symbolHeight);
-            
-            return symbolIndex % symbols.length;
+            localStorage.setItem('slotsMaxWin', maxWin);
         }
         
         // Инициализация игры при загрузке
